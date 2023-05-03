@@ -1,20 +1,43 @@
-# Simple Clipboard application in python
+# Clipboard Logger
 
-## Introduction
-This application let's you store your copied texts to use it later
-
-  ![snag-0086](images/app.png)
+Clipboard Logger is a simple application built with Python and PyQt5 that allows you to log and manage your clipboard history. It records the text you copy to your clipboard and provides a list of the last 10 entries for easy access.
 
 
-## Installing
+## Requirements
 
-At first you need to open up your Terminal window in the application folder, then type the following command it will install the components that it requires.
+- Python 3.x
+- PyQt5
 
-To install, on windows, type this into a command prompt:
+## Installation
 
-    pip install -r requirements.txt
+1. Clone the repository:
+
+   ```
+   git clone https://github.com/nur-zaman/clipboardLogger.git
+   ```
+
+2. Change to the project directory:
+
+   ```
+   cd clipboardLogger
+   ```
+
+3. Install the required dependencies:
+
+   ```
+   pip install pyqt5
+   ```
+
+## Usage
+
+Run the `main.py` file to start the application:
+
+```
+python main.py
+```
+
+The Clipboard Logger window will appear. You can now use the application to log and manage your clipboard history.
 
 
-## Running the program
 
-After your pip install, open the <code>*clipBoard.pyw* </code> file.
+
