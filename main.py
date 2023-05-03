@@ -10,10 +10,12 @@ from PyQt5.QtWidgets import (
     QLabel,
     QListWidget,
     QMessageBox,
+    QCheckBox,
 )
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtGui import QIcon, QFont, QColor, QPalette
 from PyQt5 import QtCore
 import clipboard
+from PyQt5.QtCore import Qt
 
 
 class ClipboardApp(QWidget):
@@ -23,16 +25,16 @@ class ClipboardApp(QWidget):
 
         self.notice = QLabel("Click an item to copy")
 
-        self.setWindowTitle("Clipboard")
+        self.setWindowTitle("Clipboard Logger")
         self.setWindowIcon(QIcon("clipboard.ico"))
-        self.setMinimumSize(200, 300)
+        self.setMinimumSize(200, 100)
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
 
         layout = QVBoxLayout()
         label_font = QFont("Arial", 18)
-        label = QLabel("Clipboard")
-        label.setFont(label_font)
-        layout.addWidget(label)
+        # label = QLabel("Clipboard")
+        # label.setFont(label_font)
+        # layout.addWidget(label)
 
         help_button = QPushButton("Help")
         help_button.setToolTip(
@@ -55,6 +57,13 @@ class ClipboardApp(QWidget):
         button_layout.addWidget(clear_button)
         button_layout.addWidget(exit_button)
 
+        # Create a checkbox for theme selection
+        theme_checkbox = QCheckBox("Dark Theme")
+        theme_checkbox.setChecked(True)
+        theme_checkbox.stateChanged.connect(self.switch_theme)
+
+        button_layout.addWidget(theme_checkbox)
+
         layout.addLayout(button_layout)
         layout.addWidget(self.notice)
 
@@ -65,17 +74,38 @@ class ClipboardApp(QWidget):
 
         self.setLayout(layout)
 
+        self.set_theme("dark")  # Set the initial theme to dark
+
     def load_last_10_logs(self):
+        now = datetime.datetime.now()
         today = datetime.date.today().strftime("%Y-%m-%d")
         filename = f"logs/clipboard_{today}.txt"
+        logs = []
 
         if os.path.isfile(filename):
             with open(filename, "r") as file:
                 lines = file.readlines()
-                last_10_logs = [line.strip() for line in lines[-10:]]
-                return last_10_logs
+                for line in lines:
+                    line = line.strip()
+                    if line:
+                        log_parts = line.split(" - ")
+                        if len(log_parts) == 2:
+                            log_timestamp = log_parts[0]
+                            log_value = log_parts[1]
+                            try:
+                                log_datetime = datetime.datetime.strptime(
+                                    log_timestamp, "%Y-%m-%d %H:%M:%S.%f"
+                                )
+                                if (
+                                    log_datetime.date() == now.date()
+                                    and log_datetime <= now
+                                ):
+                                    logs.append(line)
+                            except ValueError:
+                                pass
 
-        return ["empty"]
+        last_10_logs = logs[-10:] if len(logs) >= 10 else logs
+        return last_10_logs if logs else ["empty"]
 
     def update_clip_list(self, value):
         if "\n" in value:
@@ -116,6 +146,48 @@ class ClipboardApp(QWidget):
             "Help",
             "Press Log to store your clipboard data\nPress Clear to clear the list\nPress Exit to close the clipboard",
         )
+
+    def switch_theme(self, checked):
+        if checked:
+            self.set_theme("dark")
+        else:
+            self.set_theme("light")
+
+    def set_theme(self, theme):
+        if theme == "dark":
+            app.setStyle("Fusion")
+            palette = app.palette()
+            palette.setColor(QPalette.Window, QColor(53, 53, 53))
+            palette.setColor(QPalette.WindowText, Qt.white)
+            palette.setColor(QPalette.Base, QColor(25, 25, 25))
+            palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
+            palette.setColor(QPalette.ToolTipBase, Qt.white)
+            palette.setColor(QPalette.ToolTipText, Qt.white)
+            palette.setColor(QPalette.Text, Qt.white)
+            palette.setColor(QPalette.Button, QColor(53, 53, 53))
+            palette.setColor(QPalette.ButtonText, Qt.white)
+            palette.setColor(QPalette.BrightText, Qt.red)
+            palette.setColor(QPalette.Link, QColor(42, 130, 218))
+            palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+            palette.setColor(QPalette.HighlightedText, Qt.black)
+            app.setPalette(palette)
+        elif theme == "light":
+            app.setStyle("Fusion")
+            palette = app.palette()
+            palette.setColor(QPalette.Window, Qt.white)
+            palette.setColor(QPalette.WindowText, Qt.black)
+            palette.setColor(QPalette.Base, Qt.white)
+            palette.setColor(QPalette.AlternateBase, QColor(240, 240, 240))
+            palette.setColor(QPalette.ToolTipBase, Qt.white)
+            palette.setColor(QPalette.ToolTipText, Qt.black)
+            palette.setColor(QPalette.Text, Qt.black)
+            palette.setColor(QPalette.Button, Qt.white)
+            palette.setColor(QPalette.ButtonText, Qt.black)
+            palette.setColor(QPalette.BrightText, Qt.red)
+            palette.setColor(QPalette.Link, QColor(42, 130, 218))
+            palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+            palette.setColor(QPalette.HighlightedText, Qt.white)
+            app.setPalette(palette)
 
 
 if __name__ == "__main__":
